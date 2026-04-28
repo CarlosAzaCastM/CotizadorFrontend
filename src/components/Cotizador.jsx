@@ -135,7 +135,7 @@ export default function Cotizador() {
         await navigator.share({
           files: [archivoPdf],
           title: "Cotización",
-          text: "Hola, adjunto la cotización solicitada.",
+          text: "adjunto la cotización solicitada.",
         });
       } catch (error) {
         console.log("Error compartiendo:", error);
