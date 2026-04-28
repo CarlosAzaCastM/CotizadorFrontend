@@ -150,10 +150,14 @@ export default function Cotizador() {
   };
 
   return (
-    <div className="min-h-screen bg-[#8B1E2D] p-8 font-sans text-white">
-      <div className="max-w-6xl mx-auto grid grid-cols-1 md:grid-cols-3 gap-6">
+    // Agregamos print:bg-white y print:p-0 para limpiar el fondo en la impresión
+    <div className="min-h-screen bg-[#8B1E2D] p-8 font-sans text-white print:bg-white print:p-0">
+      // Agregamos print:block para romper el grid al imprimir y que la tabla
+      use todo el ancho
+      <div className="max-w-6xl mx-auto grid grid-cols-1 md:grid-cols-3 gap-6 print:block">
         {/* PANEL IZQUIERDO: Búsqueda y Selección */}
-        <div className="md:col-span-1 bg-[#2F2F2F] p-6 rounded-lg shadow-xl h-fit">
+        {/* Agregamos print:hidden para que todo el catálogo desaparezca en el PDF */}
+        <div className="md:col-span-1 bg-[#2F2F2F] p-6 rounded-lg shadow-xl h-fit print:hidden">
           <h2 className="text-xl font-bold mb-4">Catálogo de Productos</h2>
           <input
             type="text"
@@ -187,7 +191,9 @@ export default function Cotizador() {
 
         {/* PANEL DERECHO: Vista de Cotización y Envío */}
         <div className="md:col-span-2 flex flex-col gap-4">
-          <div className="flex justify-end gap-3">
+          {/* BOTÓN IMPRIMIR */}
+          {/* Agregamos print:hidden porque no queremos imprimir el botón de imprimir */}
+          <div className="flex justify-end gap-3 print:hidden">
             <button
               onClick={handlePrint}
               className="bg-[#D32F2F] hover:bg-red-800 px-4 py-2 rounded flex items-center gap-2 font-bold transition-colors shadow-lg"
@@ -197,9 +203,9 @@ export default function Cotizador() {
             </button>
           </div>
 
-          {/* PANEL DE COMPARTIR (Simplificado sin teléfono) */}
-          <div className="bg-[#2F2F2F] p-6 rounded-lg shadow-xl flex flex-col gap-4 items-center">
-            {/* Zona Drag & Drop */}
+          {/* PANEL DE COMPARTIR */}
+          {/* Agregamos print:hidden para ocultar la zona de Drag&Drop y el botón de WhatsApp */}
+          <div className="bg-[#2F2F2F] p-6 rounded-lg shadow-xl flex flex-col gap-4 items-center print:hidden">
             <div
               className={`w-full border-2 border-dashed rounded-lg p-6 text-center transition-colors cursor-pointer ${isDragging ? "border-[#D32F2F] bg-red-900/20" : "border-gray-500 hover:border-gray-400 bg-gray-800"}`}
               onDragOver={onDragOver}
@@ -241,8 +247,8 @@ export default function Cotizador() {
           {/* Contenedor Ref para el PDF */}
           <div
             ref={componentRef}
-            // Agregué p-4 md:p-8 para que en celular tenga menos padding y aproveche el espacio
-            className="bg-[#2F2F2F] p-4 md:p-8 rounded-lg shadow-xl print:text-black print:bg-white"
+            // Agregué print:shadow-none y print:w-full para limpiar estilos extra en el PDF
+            className="bg-[#2F2F2F] p-4 md:p-8 rounded-lg shadow-xl print:text-black print:bg-white print:shadow-none print:w-full print:m-0"
           >
             <h1 className="text-3xl md:text-4xl font-bold text-center p-3 md:p-5">
               Herrajes Tiscareño
@@ -256,10 +262,8 @@ export default function Cotizador() {
               </div>
             </div>
 
-            {/* CONTENEDOR RESPONSIVO DE LA TABLA */}
-            <div className="overflow-x-auto w-full">
-              {/* min-w-[600px] fuerza a la tabla a no apachurrarse, activando el scroll en celulares */}
-              <table className="w-full text-left border-collapse min-w-[600px]">
+            <div className="overflow-x-auto w-full print:overflow-visible">
+              <table className="w-full text-left border-collapse min-w-[600px] print:min-w-full">
                 <thead>
                   <tr className="border-b border-gray-600 print:border-gray-300">
                     <th className="py-3 px-2">Cód.</th>
@@ -330,7 +334,7 @@ export default function Cotizador() {
             </div>
 
             <div className="mt-8 flex justify-end">
-              <div className="bg-gray-800 print:bg-gray-100 p-4 rounded-lg w-full md:w-auto min-w-[250px]">
+              <div className="bg-gray-800 print:bg-transparent print:p-0 p-4 rounded-lg w-full md:w-auto min-w-[250px]">
                 <div className="flex justify-between items-center text-xl font-bold">
                   <span>TOTAL:</span>
                   <span>${calcularTotal().toFixed(2)}</span>
