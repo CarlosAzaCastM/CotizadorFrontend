@@ -18,7 +18,9 @@ export default function Cotizador() {
     const fetchProductos = async () => {
       try {
         // Hacemos la petición a la API de FastAPI
-        const response = await fetch("http://localhost:8000/api/productos");
+        const response = await fetch(
+          "cotizadorbackend-production-7700.up.railway.app/api/productos"
+        );
 
         if (!response.ok) {
           throw new Error("Error al obtener los productos");
