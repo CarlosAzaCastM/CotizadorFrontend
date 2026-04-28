@@ -19,7 +19,7 @@ export default function Cotizador() {
       try {
         // Hacemos la petición a la API de FastAPI
         const response = await fetch(
-          "cotizadorbackend-production-7700.up.railway.app/api/productos"
+          `${import.meta.env.VITE_API_URL}/api/productos`
         );
 
         if (!response.ok) {
