@@ -150,10 +150,7 @@ export default function Cotizador() {
   };
 
   return (
-    // Agregamos print:bg-white y print:p-0 para limpiar el fondo en la impresión
     <div className="min-h-screen bg-[#8B1E2D] p-8 font-sans text-white print:bg-white print:p-0">
-      // Agregamos print:block para romper el grid al imprimir y que la tabla
-      use todo el ancho
       <div className="max-w-6xl mx-auto grid grid-cols-1 md:grid-cols-3 gap-6 print:block">
         {/* PANEL IZQUIERDO: Búsqueda y Selección */}
         {/* Agregamos print:hidden para que todo el catálogo desaparezca en el PDF */}
