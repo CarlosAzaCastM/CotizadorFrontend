@@ -8,7 +8,6 @@ export default function Cotizador() {
   const [cotizacion, setCotizacion] = useState([]);
 
   // Estados para WhatsApp y Drag & Drop
-  const [telefono, setTelefono] = useState("");
   const [archivoPdf, setArchivoPdf] = useState(null);
   const [isDragging, setIsDragging] = useState(false);
 
@@ -121,22 +120,17 @@ export default function Cotizador() {
     }
   };
 
-  // --- LOGICA WHATSAPP ---
-  const enviarWhatsApp = async () => {
-    if (!telefono) {
-      alert("Por favor, ingresa un número de celular válido.");
+  // --- LOGICA COMPARTIR ---
+  const compartirCotizacion = async () => {
+    if (!archivoPdf) {
+      alert(
+        "Por favor, sube o arrastra el archivo PDF de la cotización primero."
+      );
       return;
     }
 
-    // Limpiar el número de espacios o guiones
-    const numeroLimpio = telefono.replace(/\D/g, "");
-
-    // Si hay archivo y el navegador soporta compartir archivos nativamente (Ej: Móviles, Safari)
-    if (
-      archivoPdf &&
-      navigator.canShare &&
-      navigator.canShare({ files: [archivoPdf] })
-    ) {
+    // Si el navegador soporta compartir archivos nativamente (Ej: Móviles, Safari, Edge moderno)
+    if (navigator.canShare && navigator.canShare({ files: [archivoPdf] })) {
       try {
         await navigator.share({
           files: [archivoPdf],
@@ -147,17 +141,11 @@ export default function Cotizador() {
         console.log("Error compartiendo:", error);
       }
     } else {
-      // Fallback para PC: Abrir WhatsApp Web con el número
-      const mensaje = "Hola, te envío tu cotización.";
-      const url = `https://wa.me/52${numeroLimpio}?text=${encodeURIComponent(mensaje)}`;
-      window.open(url, "_blank");
-
-      // Notificamos al usuario lo que debe hacer en PC
-      if (archivoPdf) {
-        alert(
-          "Por restricciones de WhatsApp Web, debes adjuntar el archivo manualmente en el chat que se acaba de abrir."
-        );
-      }
+      // Fallback para PC (Chrome/Firefox antiguo) que no soporte compartir archivos nativamente
+      alert(
+        "Tu navegador no soporta compartir archivos directamente. Se abrirá WhatsApp Web para que lo adjuntes manualmente."
+      );
+      window.open("https://web.whatsapp.com/", "_blank");
     }
   };
 
@@ -209,11 +197,11 @@ export default function Cotizador() {
             </button>
           </div>
 
-          {/* PANEL DE WHATSAPP (NUEVO) */}
-          <div className="bg-[#2F2F2F] p-6 rounded-lg shadow-xl flex flex-col md:flex-row gap-6 items-center">
+          {/* PANEL DE COMPARTIR (Simplificado sin teléfono) */}
+          <div className="bg-[#2F2F2F] p-6 rounded-lg shadow-xl flex flex-col gap-4 items-center">
             {/* Zona Drag & Drop */}
             <div
-              className={`flex-1 w-full border-2 border-dashed rounded-lg p-6 text-center transition-colors cursor-pointer ${isDragging ? "border-[#D32F2F] bg-red-900/20" : "border-gray-500 hover:border-gray-400 bg-gray-800"}`}
+              className={`w-full border-2 border-dashed rounded-lg p-6 text-center transition-colors cursor-pointer ${isDragging ? "border-[#D32F2F] bg-red-900/20" : "border-gray-500 hover:border-gray-400 bg-gray-800"}`}
               onDragOver={onDragOver}
               onDragLeave={onDragLeave}
               onDrop={onDrop}
@@ -241,113 +229,108 @@ export default function Cotizador() {
               )}
             </div>
 
-            {/* Input Celular y Botón */}
-            <div className="flex-1 w-full flex flex-col gap-3">
-              <label className="text-sm font-semibold flex items-center gap-2">
-                <Phone size={16} />
-                Número de WhatsApp (con código de área)
-              </label>
-              <input
-                type="text"
-                placeholder="Ej: 5512345678"
-                className="w-full p-3 rounded bg-gray-800 border border-gray-600 text-white placeholder-gray-400 focus:outline-none focus:border-[#D32F2F]"
-                value={telefono}
-                onChange={(e) => setTelefono(e.target.value)}
-              />
-              <button
-                onClick={enviarWhatsApp}
-                className="bg-green-600 hover:bg-green-700 w-full py-3 rounded flex items-center justify-center gap-2 font-bold transition-colors shadow-lg mt-1"
-              >
-                <Send size={20} />
-                2. Enviar por WhatsApp
-              </button>
-            </div>
+            <button
+              onClick={compartirCotizacion}
+              className="bg-green-600 hover:bg-green-700 w-full py-3 rounded flex items-center justify-center gap-2 font-bold transition-colors shadow-lg"
+            >
+              <Send size={20} />
+              2. Compartir Cotización
+            </button>
           </div>
 
           {/* Contenedor Ref para el PDF */}
           <div
             ref={componentRef}
-            className="bg-[#2F2F2F] p-8 rounded-lg shadow-xl print:text-black print:bg-white"
+            // Agregué p-4 md:p-8 para que en celular tenga menos padding y aproveche el espacio
+            className="bg-[#2F2F2F] p-4 md:p-8 rounded-lg shadow-xl print:text-black print:bg-white"
           >
-            <h1 className="text-4xl font-bold text-center p-5">
+            <h1 className="text-3xl md:text-4xl font-bold text-center p-3 md:p-5">
               Herrajes Tiscareño
             </h1>
-            <div className="border-b border-gray-600 print:border-gray-300 pb-4 mb-6 flex justify-between items-end">
+            <div className="border-b border-gray-600 print:border-gray-300 pb-4 mb-6 flex flex-col md:flex-row md:justify-between md:items-end gap-2">
               <div>
-                <h2 className="text-2xl font-bold">COTIZACIÓN</h2>
+                <h2 className="text-xl md:text-2xl font-bold">COTIZACIÓN</h2>
                 <p className="text-gray-400 print:text-gray-600 mt-1">
                   Fecha: {new Date().toLocaleDateString("es-MX")}
                 </p>
               </div>
             </div>
 
-            <table className="w-full text-left border-collapse">
-              <thead>
-                <tr className="border-b border-gray-600 print:border-gray-300">
-                  <th className="py-3 px-2">Cód.</th>
-                  <th className="py-3 px-2">Descripción</th>
-                  <th className="py-3 px-2 text-center">Cant.</th>
-                  <th className="py-3 px-2 text-center">P.Unitario</th>
-                  <th className="py-3 px-2 text-right">Subtotal</th>
-                  <th className="py-3 px-2 print:hidden"></th>
-                </tr>
-              </thead>
-              <tbody>
-                {cotizacion.map((item) => (
-                  <tr
-                    key={item.id_producto}
-                    className="border-b border-gray-700 print:border-gray-200"
-                  >
-                    <td className="py-3 px-2 text-sm">{item.codigo_interno}</td>
-                    <td className="py-3 px-2">{item.nombre}</td>
-                    <td className="py-3 px-2 text-center">{item.cantidad}</td>
-                    <td className="py-3 px-2 text-right">
-                      <div className="flex items-center justify-end gap-1">
-                        <span className="print:hidden">$</span>
-                        <input
-                          type="number"
-                          min="0"
-                          step="0.01"
-                          value={item.precio_venta}
-                          onChange={(e) =>
-                            modificarPrecio(item.id_producto, e.target.value)
-                          }
-                          // Clases de Tailwind para que se vea bien en pantalla oscura y no parezca un input al imprimir
-                          className="w-24 p-1 rounded bg-gray-800 border border-gray-600 text-right focus:outline-none focus:border-[#D32F2F] print:hidden"
-                        />
-                      </div>
-                      <span className="hidden print:inline">
-                        ${item.precio_venta}
-                      </span>
-                    </td>
-                    <td className="py-3 px-2 text-right">
-                      $
-                      {(
-                        (Number(item.precio_venta) || 0) * item.cantidad
-                      ).toFixed(2)}
-                    </td>
-                    <td className="py-3 px-2 text-right print:hidden">
-                      <button
-                        onClick={() => eliminarProducto(item.id_producto)}
-                        className="text-gray-400 hover:text-[#D32F2F] transition-colors"
+            {/* CONTENEDOR RESPONSIVO DE LA TABLA */}
+            <div className="overflow-x-auto w-full">
+              {/* min-w-[600px] fuerza a la tabla a no apachurrarse, activando el scroll en celulares */}
+              <table className="w-full text-left border-collapse min-w-[600px]">
+                <thead>
+                  <tr className="border-b border-gray-600 print:border-gray-300">
+                    <th className="py-3 px-2">Cód.</th>
+                    <th className="py-3 px-2">Descripción</th>
+                    <th className="py-3 px-2 text-center">Cant.</th>
+                    <th className="py-3 px-2 text-center">P.Unitario</th>
+                    <th className="py-3 px-2 text-right">Subtotal</th>
+                    <th className="py-3 px-2 print:hidden"></th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {cotizacion.map((item) => (
+                    <tr
+                      key={item.id_producto}
+                      className="border-b border-gray-700 print:border-gray-200"
+                    >
+                      <td className="py-3 px-2 text-sm whitespace-nowrap">
+                        {item.codigo_interno}
+                      </td>
+                      <td className="py-3 px-2 min-w-[150px]">{item.nombre}</td>
+                      <td className="py-3 px-2 text-center">{item.cantidad}</td>
+                      <td className="py-3 px-2 text-right">
+                        <div className="flex items-center justify-end gap-1">
+                          <span className="print:hidden">$</span>
+                          <input
+                            type="number"
+                            min="0"
+                            step="0.01"
+                            value={item.precio_venta}
+                            onChange={(e) =>
+                              modificarPrecio(item.id_producto, e.target.value)
+                            }
+                            className="w-20 md:w-24 p-1 rounded bg-gray-800 border border-gray-600 text-right focus:outline-none focus:border-[#D32F2F] print:hidden"
+                          />
+                        </div>
+                        <span className="hidden print:inline">
+                          ${item.precio_venta}
+                        </span>
+                      </td>
+                      <td className="py-3 px-2 text-right whitespace-nowrap">
+                        $
+                        {(
+                          (Number(item.precio_venta) || 0) * item.cantidad
+                        ).toFixed(2)}
+                      </td>
+                      <td className="py-3 px-2 text-right print:hidden">
+                        <button
+                          onClick={() => eliminarProducto(item.id_producto)}
+                          className="text-gray-400 hover:text-[#D32F2F] transition-colors p-1"
+                        >
+                          <Trash2 size={18} />
+                        </button>
+                      </td>
+                    </tr>
+                  ))}
+                  {cotizacion.length === 0 && (
+                    <tr>
+                      <td
+                        colSpan="6"
+                        className="text-center py-8 text-gray-500"
                       >
-                        <Trash2 size={18} />
-                      </button>
-                    </td>
-                  </tr>
-                ))}
-                {cotizacion.length === 0 && (
-                  <tr>
-                    <td colSpan="6" className="text-center py-8 text-gray-500">
-                      No hay productos en la cotización.
-                    </td>
-                  </tr>
-                )}
-              </tbody>
-            </table>
+                        No hay productos en la cotización.
+                      </td>
+                    </tr>
+                  )}
+                </tbody>
+              </table>
+            </div>
 
             <div className="mt-8 flex justify-end">
-              <div className="bg-gray-800 print:bg-gray-100 p-4 rounded-lg min-w-[250px]">
+              <div className="bg-gray-800 print:bg-gray-100 p-4 rounded-lg w-full md:w-auto min-w-[250px]">
                 <div className="flex justify-between items-center text-xl font-bold">
                   <span>TOTAL:</span>
                   <span>${calcularTotal().toFixed(2)}</span>
